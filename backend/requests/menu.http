@@ -1,0 +1,75 @@
+@baseUrl = http://localhost:8000/api/v1
+
+### 1. Login admin
+# @name loginAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@zinukscafe.com",
+  "password": "Admin@123"
+}
+
+### 2. Get categories (public)
+GET {{baseUrl}}/categories
+
+### 3. Get all menu items (public)
+GET {{baseUrl}}/menu
+
+### 4. Search items by name
+GET {{baseUrl}}/menu?q=coffee
+
+### 5. Create category (admin)
+# @name newCategory
+POST {{baseUrl}}/categories
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{
+  "name": "Pasta",
+  "order": 5
+}
+
+### 6. Create item in the new category (admin)
+# @name newItem
+POST {{baseUrl}}/menu
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{
+  "name": "Creamy Alfredo Pasta",
+  "description": "Chicken alfredo with garlic bread",
+  "price": 350,
+  "category": "{{newCategory.response.body._id}}"
+}
+
+### 7. Toggle availability (admin)
+PATCH {{baseUrl}}/menu/{{newItem.response.body._id}}/availability
+Authorization: Bearer {{loginAdmin.response.body.token}}
+
+### 8. Update price (admin)
+PUT {{baseUrl}}/menu/{{newItem.response.body._id}}
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{
+  "price": 380
+}
+
+### 9. Try creating item WITHOUT login (expect 401)
+POST {{baseUrl}}/menu
+Content-Type: application/json
+
+{
+  "name": "Hacker Item",
+  "price": 1,
+  "category": "{{newCategory.response.body._id}}"
+}
+
+### 10. Delete item (admin)
+DELETE {{baseUrl}}/menu/{{newItem.response.body._id}}
+Authorization: Bearer {{loginAdmin.response.body.token}}
+
+### 11. Delete category (admin)
+DELETE {{baseUrl}}/categories/{{newCategory.response.body._id}}
+Authorization: Bearer {{loginAdmin.response.body.token}}
