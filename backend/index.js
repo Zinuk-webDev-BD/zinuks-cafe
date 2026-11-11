@@ -16,7 +16,9 @@
    app.use("/api/v1/auth", require("./src/routes/authRoutes"));
    app.use("/api/v1/categories", require("./src/routes/categoryRoutes"));
 app.use("/api/v1/menu", require("./src/routes/menuRoutes"));
-
+app.use((err, req, res, next) => {
+  res.status(400).json({ message: err.message });
+});
    const PORT = process.env.PORT || 8000;
 
    mongoose

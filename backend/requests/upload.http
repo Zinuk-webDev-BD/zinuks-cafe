@@ -1,0 +1,27 @@
+@baseUrl = http://localhost:8000/api/v1
+
+### 1. Login admin
+# @name loginAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@zinukscafe.com",
+  "password": "Admin@123"
+}
+
+### 2. Get menu (copy one item _id)
+# @name menu
+GET {{baseUrl}}/menu
+
+### 3. Upload image for first item
+POST {{baseUrl}}/menu/{{menu.response.body.$[0]._id}}/image
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: multipart/form-data; boundary=BOUNDARY
+
+--BOUNDARY
+Content-Disposition: form-data; name="image"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< ./test.jpg
+--BOUNDARY--
