@@ -1,0 +1,44 @@
+@baseUrl = http://localhost:8000/api/v1
+
+### 1. Register customer
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test Customer",
+  "email": "customer@test.com",
+  "phone": "01700000000",
+  "password": "123456"
+}
+
+### 2. Login customer
+# @name loginCustomer
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "customer@test.com",
+  "password": "123456"
+}
+
+### 3. My profile (customer)
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{loginCustomer.response.body.token}}
+
+### 4. Admin route with customer token (expect 403)
+GET {{baseUrl}}/auth/admin-test
+Authorization: Bearer {{loginCustomer.response.body.token}}
+
+### 5. Login admin
+# @name loginAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@zinukscafe.com",
+  "password": "Admin@123"
+}
+
+### 6. Admin route with admin token (expect Welcome admin)
+GET {{baseUrl}}/auth/admin-test
+Authorization: Bearer {{loginAdmin.response.body.token}}

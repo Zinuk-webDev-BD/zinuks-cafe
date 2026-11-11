@@ -9,9 +9,11 @@
    app.use(cors());
    app.use(express.json());
 
+
    app.get("/", (req, res) => {
      res.json({ message: "Zinuk's Cafe Corner API is running" });
    });
+   app.use("/api/v1/auth", require("./src/routes/authRoutes"));
 
    const PORT = process.env.PORT || 8000;
 
