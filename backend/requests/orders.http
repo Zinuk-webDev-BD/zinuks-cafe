@@ -1,0 +1,161 @@
+@baseUrl = http://localhost:8000/api/v1
+
+### 1. Login customer
+# @name loginCustomer
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "customer@test.com",
+  "password": "123456"
+}
+
+### 2. Login admin
+# @name loginAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@zinukscafe.com",
+  "password": "Admin@123"
+}
+
+### 3. Get menu
+# @name menu
+GET {{baseUrl}}/menu
+
+### 4. Get settings
+GET {{baseUrl}}/settings
+
+### 5. Create order (Caffe Latte Large + Extra shot x2, Cappuccino Regular x1)
+# @name newOrder
+POST {{baseUrl}}/orders
+Authorization: Bearer {{loginCustomer.response.body.token}}
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "menuItem": "{{menu.response.body.$[0]._id}}",
+      "quantity": 2,
+      "variant": "Large",
+      "addOns": ["Extra shot"]
+    },
+    {
+      "menuItem": "{{menu.response.body.$[1]._id}}",
+      "quantity": 1,
+      "variant": "Regular"
+    }
+  ],
+  "address": {
+    "name": "Test Customer",
+    "phone": "01700000000",
+    "address": "House 12, Road 5, Dhanmondi, Dhaka",
+    "note": "Please call before arriving"
+  },
+  "paymentMethod": "cod"
+}
+
+### 6. My orders
+GET {{baseUrl}}/orders/my
+Authorization: Bearer {{loginCustomer.response.body.token}}
+
+### 7. Get single order
+GET {{baseUrl}}/orders/{{newOrder.response.body._id}}
+Authorization: Bearer {{loginCustomer.response.body.token}}
+
+### 8. Customer tries admin list (expect 403)
+GET {{baseUrl}}/orders
+Authorization: Bearer {{loginCustomer.response.body.token}}
+
+### 9. Admin lists all orders
+GET {{baseUrl}}/orders
+Authorization: Bearer {{loginAdmin.response.body.token}}
+
+### 10. Admin: confirmed
+PATCH {{baseUrl}}/orders/{{newOrder.response.body._id}}/status
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{ "status": "confirmed" }
+
+### 11. Admin: preparing
+PATCH {{baseUrl}}/orders/{{newOrder.response.body._id}}/status
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{ "status": "preparing" }
+
+### 12. Admin: try wrong jump to delivered (expect 400)
+PATCH {{baseUrl}}/orders/{{newOrder.response.body._id}}/status
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{ "status": "delivered" }
+
+### 13. Admin: out_for_delivery
+PATCH {{baseUrl}}/orders/{{newOrder.response.body._id}}/status
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{ "status": "out_for_delivery" }
+
+### 14. Admin: delivered (paymentStatus becomes paid)
+PATCH {{baseUrl}}/orders/{{newOrder.response.body._id}}/status
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{ "status": "delivered" }
+
+### 15. Order without login (expect 401)
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{ "items": [] }
+
+### 16. Create second order (for cancel test)
+# @name order2
+POST {{baseUrl}}/orders
+Authorization: Bearer {{loginCustomer.response.body.token}}
+Content-Type: application/json
+
+{
+  "items": [
+    { "menuItem": "{{menu.response.body.$[0]._id}}", "quantity": 1, "variant": "Regular" }
+  ],
+  "address": {
+    "name": "Test Customer",
+    "phone": "01700000000",
+    "address": "House 12, Road 5, Dhanmondi, Dhaka"
+  }
+}
+
+### 17. Customer cancels the pending order
+PATCH {{baseUrl}}/orders/{{order2.response.body._id}}/cancel
+Authorization: Bearer {{loginCustomer.response.body.token}}
+
+### 18. Admin closes the cafe
+PUT {{baseUrl}}/settings
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{ "isOpen": false }
+
+### 19. Order while closed (expect 400 cafe is closed)
+POST {{baseUrl}}/orders
+Authorization: Bearer {{loginCustomer.response.body.token}}
+Content-Type: application/json
+
+{
+  "items": [
+    { "menuItem": "{{menu.response.body.$[0]._id}}", "quantity": 1 }
+  ],
+  "address": { "name": "Test", "phone": "017", "address": "Dhaka" }
+}
+
+### 20. Admin opens the cafe again
+PUT {{baseUrl}}/settings
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{ "isOpen": true }

@@ -16,6 +16,8 @@
    app.use("/api/v1/auth", require("./src/routes/authRoutes"));
    app.use("/api/v1/categories", require("./src/routes/categoryRoutes"));
 app.use("/api/v1/menu", require("./src/routes/menuRoutes"));
+app.use("/api/v1/settings", require("./src/routes/settingsRoutes"));
+app.use("/api/v1/orders", require("./src/routes/orderRoutes"));
 app.use((err, req, res, next) => {
   res.status(400).json({ message: err.message });
 });
