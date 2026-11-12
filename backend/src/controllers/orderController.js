@@ -1,6 +1,7 @@
 const Order = require("../models/Order");
 const MenuItem = require("../models/MenuItem");
 const Settings = require("../models/Settings");
+const { notifyAdmins, notifyUser } = require("../sockets");
 
 const FLOW = {
   pending: ["confirmed", "cancelled"],
@@ -110,6 +111,7 @@ exports.createOrder = async (req, res) => {
       statusHistory: [{ status: "pending", by: req.user._id }],
     });
 
+    notifyAdmins("order:new", order);
     res.status(201).json(order);
   } catch (err) {
     handleError(res, err);
@@ -158,6 +160,7 @@ exports.cancelMyOrder = async (req, res) => {
     order.status = "cancelled";
     order.statusHistory.push({ status: "cancelled", by: req.user._id });
     await order.save();
+    notifyAdmins("order:updated", order);
     res.json(order);
   } catch (err) {
     handleError(res, err);
@@ -198,6 +201,14 @@ exports.updateStatus = async (req, res) => {
       order.paymentStatus = "paid";
     }
     await order.save();
+
+    notifyUser(order.user, "order:status", {
+      _id: order._id,
+      orderNumber: order.orderNumber,
+      status: order.status,
+    });
+    notifyAdmins("order:updated", order);
+
     res.json(order);
   } catch (err) {
     handleError(res, err);

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Zinuk's Cafe Corner - Live Orders</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 700px; margin: 30px auto; padding: 0 16px; }
+  input, button { padding: 8px; margin: 4px 0; }
+  .card { border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin: 10px 0; }
+  .new { background: #fff7e0; border-color: #f0b429; }
+  #status { font-weight: bold; }
+</style>
+</head>
+<body>
+<h2>Zinuk's Cafe Corner - Live Orders</h2>
+
+<div id="loginBox">
+  <input id="email" type="email" value="admin@zinukscafe.com" /><br />
+  <input id="password" type="password" value="Admin@123" /><br />
+  <button onclick="start()">Login and listen</button>
+</div>
+
+<p>Status: <span id="status">Not connected</span></p>
+<div id="orders"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  let audioCtx;
+
+  function beep() {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.value = 880;
+    gain.gain.value = 0.2;
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.4);
+  }
+
+  function setStatus(text) {
+    document.getElementById("status").textContent = text;
+  }
+
+  function addCard(order, isNew) {
+    const div = document.createElement("div");
+    div.className = "card" + (isNew ? " new" : "");
+    div.id = "o-" + order._id;
+
+    const title = document.createElement("strong");
+    title.textContent = order.orderNumber + " - " + order.total + " Tk";
+
+    const items = document.createElement("div");
+    items.textContent = order.items
+      .map((i) => i.quantity + " x " + i.name + (i.variant ? " (" + i.variant + ")" : ""))
+      .join(", ");
+
+    const who = document.createElement("div");
+    who.textContent =
+      order.address.name + " | " + order.address.phone + " | " + order.address.address;
+
+    const st = document.createElement("div");
+    st.className = "st";
+    st.textContent = "Status: " + order.status;
+
+    div.append(title, items, who, st);
+    document.getElementById("orders").prepend(div);
+  }
+
+  async function start() {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    const res = await fetch("/api/v1/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: document.getElementById("email").value,
+        password: document.getElementById("password").value,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) return alert(data.message);
+    if (data.user.role !== "admin") return alert("Admin only");
+
+    const socket = io({ auth: { token: data.token } });
+
+    socket.on("connect", () => setStatus("Connected, waiting for orders..."));
+    socket.on("connect_error", (err) => setStatus("Error: " + err.message));
+    socket.on("disconnect", () => setStatus("Disconnected"));
+
+    socket.on("order:new", (order) => {
+      beep();
+      addCard(order, true);
+    });
+
+    socket.on("order:updated", (order) => {
+      const card = document.getElementById("o-" + order._id);
+      if (card) {
+        card.classList.remove("new");
+        card.querySelector(".st").textContent = "Status: " + order.status;
+      } else {
+        addCard(order, false);
+      }
+    });
+  }
+</script>
+</body>
+</html>
