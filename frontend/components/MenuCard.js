@@ -15,23 +15,23 @@ export default function MenuCard({ item, categoryName }) {
 
   return (
     <article
-      className={`group overflow-hidden rounded-2xl bg-white shadow-md shadow-espresso/5 transition duration-300 hover:-translate-y-1 hover:shadow-xl ${
+      className={`group relative h-full overflow-hidden rounded-2xl bg-white shadow-md shadow-espresso/10 transition-shadow duration-300 hover:shadow-2xl ${
         item.isAvailable ? "" : "opacity-70"
       }`}
     >
-      <div className="relative h-48 overflow-hidden">
+      <div className="img-shine relative h-48">
         {item.image ? (
           <img
             src={item.image}
             alt={item.name}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
+            className="h-full w-full object-cover transition duration-700 group-hover:scale-125"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-latte text-6xl">
             {EMOJI[categoryName] || "🍽️"}
           </div>
         )}
-        <span className="absolute right-3 top-3 rounded-full bg-espresso/90 px-3 py-1 text-sm font-semibold text-white backdrop-blur">
+        <span className="absolute right-3 top-3 rounded-full bg-espresso/90 px-3 py-1 text-sm font-semibold text-white backdrop-blur transition duration-300 group-hover:scale-110 group-hover:bg-caramel">
           {hasSizes ? "From " : ""}
           {startPrice} Tk
         </span>
@@ -60,6 +60,8 @@ export default function MenuCard({ item, categoryName }) {
           </div>
         )}
       </div>
+
+      <span className="absolute bottom-0 left-0 h-1 w-0 bg-caramel transition-all duration-500 group-hover:w-full" />
     </article>
   );
 }

@@ -10,3 +10,307 @@
 html {
   scroll-behavior: smooth;
 }
+
+/* ---------- Scroll reveal (works in every browser) ---------- */
+.rv {
+  opacity: 0;
+  transition: opacity 0.9s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+  will-change: opacity, transform;
+}
+.rv[data-variant="up"] {
+  transform: translateY(60px);
+}
+.rv[data-variant="left"] {
+  transform: translateX(-90px);
+}
+.rv[data-variant="right"] {
+  transform: translateX(90px);
+}
+.rv[data-variant="zoom"] {
+  transform: scale(0.8);
+}
+.rv.rv-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- Page transition ---------- */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.page-in {
+  animation: page-in 0.6s ease-out both;
+}
+
+/* ---------- Hero title words ---------- */
+@keyframes word-in {
+  from {
+    opacity: 0;
+    transform: translateY(50px) rotate(6deg);
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+.word-in {
+  opacity: 0;
+  animation: word-in 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.fade-up {
+  opacity: 0;
+  animation: fade-up 0.9s ease-out forwards;
+}
+
+/* ---------- Shimmer text ---------- */
+@keyframes shine {
+  to {
+    background-position: 200% center;
+  }
+}
+.shine {
+  background: linear-gradient(90deg, #c8793a 0%, #f5d9a8 40%, #c8793a 80%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shine 3s linear infinite;
+}
+
+/* ---------- Floating coffee beans ---------- */
+.bean {
+  position: absolute;
+  bottom: -50px;
+  width: 16px;
+  height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #c98a50, #6b4226);
+  opacity: 0;
+  animation: bean-float linear infinite;
+}
+.bean::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 12%;
+  bottom: 12%;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.4);
+  transform: rotate(8deg);
+}
+@keyframes bean-float {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.9;
+  }
+  90% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(-95vh) rotate(540deg);
+    opacity: 0;
+  }
+}
+
+/* ---------- Button effects ---------- */
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(200, 121, 58, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 16px rgba(200, 121, 58, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(200, 121, 58, 0);
+  }
+}
+.pulse-ring {
+  animation: pulse-ring 2.2s ease-out infinite;
+}
+
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shine::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+  transform: skewX(-20deg);
+  animation: btn-shine 3s ease-in-out infinite;
+}
+@keyframes btn-shine {
+  0% {
+    left: -75%;
+  }
+  60%,
+  100% {
+    left: 130%;
+  }
+}
+
+/* ---------- Floating icons ---------- */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+.float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* ---------- Nav link underline ---------- */
+.nav-link {
+  position: relative;
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 2px;
+  background: #c8793a;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+.nav-link:hover::after {
+  transform: scaleX(1);
+}
+
+/* ---------- Sliders ---------- */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+.marquee-track {
+  animation: marquee 25s linear infinite;
+  will-change: transform;
+}
+.marquee-reverse {
+  animation-direction: reverse;
+  animation-duration: 32s;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* ---------- Drifting decor ---------- */
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(-6deg);
+  }
+  25% {
+    transform: translate(14px, -22px) rotate(6deg);
+  }
+  50% {
+    transform: translate(-10px, -38px) rotate(-4deg);
+  }
+  75% {
+    transform: translate(-18px, -14px) rotate(8deg);
+  }
+}
+.drift {
+  opacity: 0.25;
+  animation: drift ease-in-out infinite;
+}
+
+/* ---------- Heading underline grows ---------- */
+.underline-grow {
+  width: 0;
+  transition: width 0.9s ease 0.5s;
+}
+.rv-in .underline-grow {
+  width: 3rem;
+}
+
+/* ---------- Card glare (follows the mouse) ---------- */
+.tilt {
+  will-change: transform;
+}
+.glare {
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+  background: radial-gradient(
+    circle at var(--mx, 50%) var(--my, 50%),
+    rgba(255, 255, 255, 0.4),
+    transparent 45%
+  );
+}
+.tilt:hover .glare {
+  opacity: 1;
+}
+
+/* ---------- Image light sweep ---------- */
+.img-shine {
+  position: relative;
+  overflow: hidden;
+}
+.img-shine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: skewX(-20deg);
+  pointer-events: none;
+}
+.group:hover .img-shine::after {
+  animation: sweep 0.9s ease;
+}
+@keyframes sweep {
+  to {
+    left: 140%;
+  }
+}
