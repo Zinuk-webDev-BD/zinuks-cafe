@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthProvider";
 import NavAuth from "@/components/NavAuth";
+import CartButton from "@/components/CartButton";
 import { playfair } from "@/lib/fonts";
 
 export default function Navbar() {
@@ -11,8 +12,7 @@ export default function Navbar() {
   const { user, mounted, logout } = useAuth();
   const close = () => setOpen(false);
 
-  const item =
-    "rounded-lg px-3 py-3 text-base transition hover:bg-white/10";
+  const item = "rounded-lg px-3 py-3 text-base transition hover:bg-white/10";
 
   return (
     <header className="sticky top-0 z-30 bg-espresso/95 text-white backdrop-blur">
@@ -25,39 +25,43 @@ export default function Navbar() {
           ☕ Zinuk&apos;s Cafe Corner
         </Link>
 
-        <nav className="hidden items-center gap-6 text-sm md:flex">
-          <Link href="/#menu" className="nav-link">
-            Menu
-          </Link>
-          <Link href="/#about" className="nav-link">
-            About
-          </Link>
-          <NavAuth />
-        </nav>
+        <div className="flex items-center gap-4">
+          <nav className="hidden items-center gap-6 text-sm md:flex">
+            <Link href="/#menu" className="nav-link">
+              Menu
+            </Link>
+            <Link href="/#about" className="nav-link">
+              About
+            </Link>
+            <NavAuth />
+          </nav>
 
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          aria-label="Toggle menu"
-          aria-expanded={open}
-          className="relative h-10 w-10 md:hidden"
-        >
-          <span
-            className={`absolute left-2 right-2 top-[14px] h-0.5 rounded bg-white transition-all duration-300 ${
-              open ? "translate-y-[6px] rotate-45" : ""
-            }`}
-          />
-          <span
-            className={`absolute left-2 right-2 top-[20px] h-0.5 rounded bg-white transition-all duration-300 ${
-              open ? "opacity-0" : ""
-            }`}
-          />
-          <span
-            className={`absolute left-2 right-2 top-[26px] h-0.5 rounded bg-white transition-all duration-300 ${
-              open ? "-translate-y-[6px] -rotate-45" : ""
-            }`}
-          />
-        </button>
+          <CartButton />
+
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            aria-label="Toggle menu"
+            aria-expanded={open}
+            className="relative h-10 w-10 md:hidden"
+          >
+            <span
+              className={`absolute left-2 right-2 top-[14px] h-0.5 rounded bg-white transition-all duration-300 ${
+                open ? "translate-y-[6px] rotate-45" : ""
+              }`}
+            />
+            <span
+              className={`absolute left-2 right-2 top-[20px] h-0.5 rounded bg-white transition-all duration-300 ${
+                open ? "opacity-0" : ""
+              }`}
+            />
+            <span
+              className={`absolute left-2 right-2 top-[26px] h-0.5 rounded bg-white transition-all duration-300 ${
+                open ? "-translate-y-[6px] -rotate-45" : ""
+              }`}
+            />
+          </button>
+        </div>
       </div>
 
       <div

@@ -1,3 +1,5 @@
+import AddToCartButton from "@/components/AddToCartButton";
+
 const EMOJI = {
   "Hot Coffee": "☕",
   "Cold Drinks": "🧋",
@@ -42,7 +44,7 @@ export default function MenuCard({ item, categoryName }) {
         )}
       </div>
 
-      <div className="p-5">
+      <div className="p-5 pb-6">
         <h3 className="text-lg font-semibold text-espresso">{item.name}</h3>
         <p className="mt-1 line-clamp-2 text-sm text-stone-500">
           {item.description}
@@ -59,6 +61,7 @@ export default function MenuCard({ item, categoryName }) {
             ))}
           </div>
         )}
+        <AddToCartButton item={item} />
       </div>
 
       <span className="absolute bottom-0 left-0 h-1 w-0 bg-caramel transition-all duration-500 group-hover:w-full" />

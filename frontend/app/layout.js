@@ -1,7 +1,9 @@
 import "./globals.css";
 import { playfair, poppins } from "@/lib/fonts";
 import { AuthProvider } from "@/components/AuthProvider";
+import { CartProvider } from "@/components/CartProvider";
 import Navbar from "@/components/Navbar";
+import CartDrawer from "@/components/CartDrawer";
 import ScrollProgress from "@/components/ScrollProgress";
 
 export const metadata = {
@@ -14,20 +16,24 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${poppins.className} bg-cream text-espresso antialiased`}>
         <AuthProvider>
-          <ScrollProgress />
-          <Navbar />
+          <CartProvider>
+            <ScrollProgress />
+            <Navbar />
 
-          <main>{children}</main>
+            <main>{children}</main>
 
-          <footer className="bg-espresso px-4 py-10 text-center text-sm text-stone-300">
-            <p className={`${playfair.className} text-lg text-white`}>
-              Zinuk&apos;s Cafe Corner
-            </p>
-            <p className="mt-2">Dhaka, Bangladesh · Open daily 9 AM to 11 PM</p>
-            <p className="mt-1 text-stone-500">
-              A demo project built with Next.js, Node.js and MongoDB
-            </p>
-          </footer>
+            <footer className="bg-espresso px-4 py-10 text-center text-sm text-stone-300">
+              <p className={`${playfair.className} text-lg text-white`}>
+                Zinuk&apos;s Cafe Corner
+              </p>
+              <p className="mt-2">Dhaka, Bangladesh · Open daily 9 AM to 11 PM</p>
+              <p className="mt-1 text-stone-500">
+                A demo project built with Next.js, Node.js and MongoDB
+              </p>
+            </footer>
+
+            <CartDrawer />
+          </CartProvider>
         </AuthProvider>
       </body>
     </html>
