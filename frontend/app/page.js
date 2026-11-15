@@ -82,7 +82,7 @@ export default function HomePage() {
             Freshly brewed · Freshly baked
           </p>
           <h1
-            className={`${playfair.className} text-balance text-5xl font-bold leading-tight sm:text-7xl`}
+            className={`${playfair.className} text-balance text-4xl font-bold leading-tight sm:text-6xl md:text-7xl`}
           >
             {titleWords.map((w, i) => (
               <span

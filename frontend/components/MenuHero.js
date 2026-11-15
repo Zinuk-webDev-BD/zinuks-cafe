@@ -25,7 +25,7 @@ export default function MenuHero() {
   const rowA = useRef(null);
   const rowB = useRef(null);
 
-    useEffect(() => {
+  useEffect(() => {
     const update = () => {
       const section = sectionRef.current;
       const a = rowA.current;
@@ -51,7 +51,7 @@ export default function MenuHero() {
 
   const onMove = (e) => {
     const el = sectionRef.current;
-        if (!el) return;
+    if (!el) return;
     const r = el.getBoundingClientRect();
     const x = e.clientX - r.left;
     const y = e.clientY - r.top;
@@ -95,11 +95,13 @@ export default function MenuHero() {
         <span
           key={i}
           aria-hidden="true"
-          className="depth pointer-events-none absolute select-none"
+          className={`depth pointer-events-none absolute select-none ${
+            i >= 4 ? "hidden sm:block" : ""
+          }`}
           style={{
             left: f.left,
             top: f.top,
-            fontSize: f.size,
+            fontSize: `clamp(1.6rem, 8vw, ${f.size})`,
             "--depth": f.depth,
           }}
         >
@@ -115,13 +117,13 @@ export default function MenuHero() {
         </span>
       ))}
 
-      <div className="relative z-10 mx-auto max-w-4xl px-4 pb-40 pt-20">
+      <div className="relative z-10 mx-auto max-w-4xl px-4 pb-32 pt-14 sm:pb-40 sm:pt-20">
         <Reveal variant="zoom">
           <div className="relative mx-auto mb-2 w-fit">
             <span className="steam" style={{ left: "26%", animationDelay: "0s" }} />
             <span className="steam" style={{ left: "46%", animationDelay: "1.1s" }} />
             <span className="steam" style={{ left: "64%", animationDelay: "2.2s" }} />
-            <div className="float text-8xl drop-shadow-[0_12px_24px_rgba(0,0,0,0.55)]">
+            <div className="float text-7xl drop-shadow-[0_12px_24px_rgba(0,0,0,0.55)] sm:text-8xl">
               ☕
             </div>
           </div>
@@ -133,7 +135,7 @@ export default function MenuHero() {
 
         <AnimatedHeading
           text="Pick your favourite"
-          className={`${playfair.className} mt-3 text-5xl font-bold sm:text-7xl`}
+          className={`${playfair.className} mt-3 text-4xl font-bold sm:text-6xl lg:text-7xl`}
         />
 
         <Reveal variant="up" delay={300}>
@@ -144,7 +146,7 @@ export default function MenuHero() {
             </span>
             <span className="line-grow h-px bg-caramel" />
           </div>
-          <p className="mt-4 text-lg text-stone-300">
+          <p className="mt-4 text-base text-stone-300 sm:text-lg">
             Everything is made fresh to order.
           </p>
         </Reveal>
@@ -154,7 +156,7 @@ export default function MenuHero() {
         aria-hidden="true"
         viewBox="0 0 1440 120"
         preserveAspectRatio="none"
-        className="absolute inset-x-0 bottom-[-1px] h-24 w-full"
+        className="absolute inset-x-0 bottom-[-1px] h-16 w-full sm:h-24"
         fill="#faf5ee"
       >
         <path d="M0,60 C180,120 360,0 540,50 C720,100 900,10 1080,55 C1260,100 1350,40 1440,60 L1440,120 L0,120 Z" />
