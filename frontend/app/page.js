@@ -1,3 +1,5 @@
+import MenuHero from "@/components/MenuHero";
+import AnimatedHeading from "@/components/AnimatedHeading";
 import { Suspense } from "react";
 import Link from "next/link";
 import MenuSection from "@/components/MenuSection";
@@ -133,22 +135,8 @@ export default function HomePage() {
         <FavouritesMarquee />
       </Suspense>
 
-            <div id="menu" className="scroll-mt-16 pt-16">
-        <div className="mx-auto max-w-6xl px-4 pb-4">
-          <Reveal variant="up">
-            <p className="text-center text-sm uppercase tracking-[0.3em] text-caramel">
-              Our menu
-            </p>
-            <h2
-              className={`${playfair.className} mt-2 text-center text-4xl font-bold`}
-            >
-              Pick your favourite
-            </h2>
-            <p className="mt-2 text-center text-stone-500">
-              Everything is made fresh to order.
-            </p>
-          </Reveal>
-        </div>
+       <div id="menu" className="scroll-mt-16">
+        <MenuHero />
         <Suspense
           fallback={
             <div className="mx-auto max-w-6xl px-4">
