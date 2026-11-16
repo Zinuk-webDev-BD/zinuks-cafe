@@ -665,3 +665,46 @@ html {
 .toast-in {
   animation: toast-in 0.4s cubic-bezier(0.3, 1.5, 0.5, 1) both;
 }
+
+
+/* ---------- Checkout ---------- */
+@keyframes grow-x {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+.grow-x {
+  animation: grow-x 1s ease 0.4s both;
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0);
+  }
+  70% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.pop {
+  animation: pop 0.5s ease 0.3s both;
+}
+
+@keyframes ride {
+  from {
+    left: -12%;
+  }
+  to {
+    left: 100%;
+  }
+}
+.ride {
+  position: absolute;
+  bottom: 4px;
+  animation: ride 4s linear infinite;
+}

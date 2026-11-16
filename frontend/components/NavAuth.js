@@ -11,7 +11,7 @@ export default function NavAuth() {
   if (!user) {
     return (
       <div className="flex items-center gap-3">
-        <Link href="/login" className="transition hover:text-caramel">
+        <Link href="/login" className="nav-link">
           Login
         </Link>
         <Link
@@ -25,8 +25,11 @@ export default function NavAuth() {
   }
 
   return (
-    <div className="flex items-center gap-3">
-      <span className="hidden text-stone-300 sm:inline">
+    <div className="flex items-center gap-4">
+      <Link href="/orders" className="nav-link">
+        My Orders
+      </Link>
+      <span className="hidden text-stone-300 lg:inline">
         Hi, {user.name.split(" ")[0]}
       </span>
       <button
