@@ -1,0 +1,37 @@
+@baseUrl = http://localhost:8000/api/v1
+@orderId = এখানে_অর্ডারের_আইডি_বসান
+
+### 1. Login admin
+# @name loginAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "email": "admin@zinukscafe.com", "password": "Admin@123" }
+
+### 2. Confirmed
+PATCH {{baseUrl}}/orders/{{orderId}}/status
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{ "status": "confirmed" }
+
+### 3. Preparing
+PATCH {{baseUrl}}/orders/{{orderId}}/status
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{ "status": "preparing" }
+
+### 4. Out for delivery
+PATCH {{baseUrl}}/orders/{{orderId}}/status
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{ "status": "out_for_delivery" }
+
+### 5. Delivered
+PATCH {{baseUrl}}/orders/{{orderId}}/status
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{ "status": "delivered" }

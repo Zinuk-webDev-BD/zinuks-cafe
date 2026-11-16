@@ -33,7 +33,10 @@ export default function LoginPage() {
         30
       );
       setDoneName(user.name.split(" ")[0]);
-      setTimeout(() => router.push("/"), 1600);
+            setTimeout(
+        () => router.push(user.role === "admin" ? "/admin" : "/"),
+        1600
+      );
     } catch (err) {
       setError(err.message);
       setErrorKey((k) => k + 1);

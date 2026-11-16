@@ -81,9 +81,15 @@ export default function Navbar() {
             (user ? (
               <>
                 <p className="px-3 pt-2 text-sm text-stone-400">
-                                  <Link href="/orders" onClick={close} className={item}>
-                  📦 My Orders
-                </Link>
+                                                  {user.role === "admin" ? (
+                  <Link href="/admin" onClick={close} className={item}>
+                    📊 Dashboard
+                  </Link>
+                ) : (
+                  <Link href="/orders" onClick={close} className={item}>
+                    📦 My Orders
+                  </Link>
+                )}
                   Signed in as {user.name.split(" ")[0]}
                 </p>
                 <button

@@ -26,9 +26,15 @@ export default function NavAuth() {
 
   return (
     <div className="flex items-center gap-4">
-      <Link href="/orders" className="nav-link">
-        My Orders
-      </Link>
+      {user.role === "admin" ? (
+        <Link href="/admin" className="nav-link font-semibold text-caramel">
+          📊 Dashboard
+        </Link>
+      ) : (
+        <Link href="/orders" className="nav-link">
+          My Orders
+        </Link>
+      )}
       <span className="hidden text-stone-300 lg:inline">
         Hi, {user.name.split(" ")[0]}
       </span>
