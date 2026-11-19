@@ -9,6 +9,13 @@ const EMOJI = {
   Desserts: "🍰",
 };
 
+const TAGS = {
+  popular: { icon: "🔥", label: "Popular", cls: "bg-orange-500" },
+  veg: { icon: "🌿", label: "Veg", cls: "bg-green-600" },
+  spicy: { icon: "🌶️", label: "Spicy", cls: "bg-red-500" },
+  new: { icon: "✨", label: "New", cls: "bg-purple-500" },
+};
+
 export default function MenuCard({ item, categoryName }) {
   const hasSizes = item.variants && item.variants.length > 0;
   const startPrice = hasSizes
@@ -33,15 +40,31 @@ export default function MenuCard({ item, categoryName }) {
             {EMOJI[categoryName] || "🍽️"}
           </div>
         )}
+
         <span className="absolute right-3 top-3 rounded-full bg-espresso/90 px-3 py-1 text-sm font-semibold text-white backdrop-blur transition duration-300 group-hover:scale-110 group-hover:bg-caramel">
           {hasSizes ? "From " : ""}
           {startPrice} Tk
         </span>
+
         {!item.isAvailable && (
           <span className="absolute left-3 top-3 rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white">
             Sold out
           </span>
         )}
+
+        <div className="absolute bottom-3 left-3 flex flex-wrap gap-1.5">
+          {(item.tags || []).map(
+            (t) =>
+              TAGS[t] && (
+                <span
+                  key={t}
+                  className={`rounded-full px-2.5 py-0.5 text-xs font-semibold text-white shadow ${TAGS[t].cls}`}
+                >
+                  {TAGS[t].icon} {TAGS[t].label}
+                </span>
+              )
+          )}
+        </div>
       </div>
 
       <div className="p-5 pb-6">

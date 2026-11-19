@@ -13,6 +13,7 @@ const menuItemSchema = new mongoose.Schema(
     price: { type: Number, required: true, min: 0 },
     variants: [{ name: String, price: Number }],
     addOns: [{ name: String, price: Number }],
+    tags: [{ type: String, enum: ["popular", "veg", "spicy", "new"] }],
     isAvailable: { type: Boolean, default: true },
   },
   { timestamps: true }
