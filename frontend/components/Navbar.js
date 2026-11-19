@@ -66,7 +66,7 @@ export default function Navbar() {
 
       <div
         className={`absolute inset-x-0 top-full overflow-hidden bg-espresso transition-all duration-300 md:hidden ${
-          open ? "max-h-96 border-t border-white/10" : "max-h-0"
+          open ? "max-h-[28rem] border-t border-white/10" : "max-h-0"
         }`}
       >
         <div className="flex flex-col gap-1 px-4 py-4">
@@ -77,46 +77,50 @@ export default function Navbar() {
             📖 About
           </Link>
 
-          {mounted &&
-            (user ? (
-              <>
-                <p className="px-3 pt-2 text-sm text-stone-400">
-                                                  {user.role === "admin" ? (
-                  <Link href="/admin" onClick={close} className={item}>
-                    📊 Dashboard
-                  </Link>
-                ) : (
-                  <Link href="/orders" onClick={close} className={item}>
-                    📦 My Orders
-                  </Link>
-                )}
-                  Signed in as {user.name.split(" ")[0]}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    logout();
-                    close();
-                  }}
-                  className={`${item} text-left`}
-                >
-                  🚪 Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <Link href="/login" onClick={close} className={item}>
-                  🔑 Login
+          {mounted && user && (
+            <>
+              {user.role === "admin" ? (
+                <Link href="/admin" onClick={close} className={item}>
+                  📊 Dashboard
                 </Link>
-                <Link
-                  href="/register"
-                  onClick={close}
-                  className="mt-1 rounded-full bg-caramel px-4 py-3 text-center font-semibold"
-                >
-                  Create account
+              ) : (
+                <Link href="/orders" onClick={close} className={item}>
+                  📦 My Orders
                 </Link>
-              </>
-            ))}
+              )}
+              <Link href="/profile" onClick={close} className={item}>
+                👤 Profile
+              </Link>
+              <p className="px-3 pt-2 text-sm text-stone-400">
+                Signed in as {user.name.split(" ")[0]}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  logout();
+                  close();
+                }}
+                className={`${item} text-left`}
+              >
+                🚪 Logout
+              </button>
+            </>
+          )}
+
+          {mounted && !user && (
+            <>
+              <Link href="/login" onClick={close} className={item}>
+                🔑 Login
+              </Link>
+              <Link
+                href="/register"
+                onClick={close}
+                className="mt-1 rounded-full bg-caramel px-4 py-3 text-center font-semibold"
+              >
+                Create account
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>

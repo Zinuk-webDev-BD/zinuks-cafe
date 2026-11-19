@@ -20,3 +20,14 @@ export async function apiRequest(path, { method = "GET", body, token } = {}) {
   if (!res.ok) throw new Error(data.message || "Something went wrong");
   return data;
 }
+
+export async function apiUpload(path, formData, token) {
+  const res = await fetch(`${API_URL}${path}`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Upload failed");
+  return data;
+}

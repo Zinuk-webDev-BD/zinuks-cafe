@@ -11,6 +11,7 @@ import { API_URL, apiRequest } from "@/lib/api";
 import { burst } from "@/lib/burst";
 import { playfair } from "@/lib/fonts";
 import { STATUS_LABEL, STATUS_STYLE, formatDate } from "@/lib/status";
+import ReorderButton from "@/components/ReorderButton";
 
 function OrderTracker() {
   const { id } = useParams();
@@ -160,6 +161,7 @@ function OrderTracker() {
                   {cancelling ? "Cancelling..." : "Cancel order"}
                 </button>
               )}
+                            <ReorderButton order={order} className="mt-4" />   
             </div>
 
             <div

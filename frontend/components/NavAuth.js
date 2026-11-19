@@ -35,9 +35,9 @@ export default function NavAuth() {
           My Orders
         </Link>
       )}
-      <span className="hidden text-stone-300 lg:inline">
-        Hi, {user.name.split(" ")[0]}
-      </span>
+      <Link href="/profile" className="nav-link">
+        👤 {user.name.split(" ")[0]}
+      </Link>
       <button
         onClick={logout}
         className="rounded-full border border-white/30 px-4 py-1.5 transition hover:bg-white/10"

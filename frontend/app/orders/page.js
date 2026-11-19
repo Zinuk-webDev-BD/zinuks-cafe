@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthProvider";
 import RequireLogin from "@/components/RequireLogin";
+import ReorderButton from "@/components/ReorderButton";
 import { apiRequest } from "@/lib/api";
 import { playfair } from "@/lib/fonts";
 import { STATUS_LABEL, STATUS_STYLE, formatDate } from "@/lib/status";
@@ -30,7 +31,9 @@ function OrdersList() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
       <h1 className={`${playfair.className} text-4xl font-bold`}>My orders</h1>
-      <p className="mt-1 text-stone-500">Tap an order to track it live.</p>
+      <p className="mt-1 text-stone-500">
+        Tap an order to track it, or order it again in one click.
+      </p>
 
       <div className="mt-8 space-y-4">
         {error && (
@@ -64,33 +67,40 @@ function OrdersList() {
 
         {orders &&
           orders.map((o, i) => (
-            <Link
+            <div
               key={o._id}
-              href={`/orders/${o._id}`}
-              className="fade-up group block rounded-2xl bg-white p-5 shadow-md transition hover:-translate-y-1 hover:shadow-xl"
+              className="fade-up rounded-2xl bg-white p-5 shadow-md transition hover:shadow-xl"
               style={{ animationDelay: `${i * 0.08}s` }}
             >
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="font-semibold">{o.orderNumber}</p>
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${STATUS_STYLE[o.status]}`}
-                >
-                  {STATUS_LABEL[o.status]}
-                </span>
+              <Link href={`/orders/${o._id}`} className="group block">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="font-semibold">{o.orderNumber}</p>
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-semibold ${STATUS_STYLE[o.status]}`}
+                  >
+                    {STATUS_LABEL[o.status]}
+                  </span>
+                </div>
+                <p className="mt-1 text-sm text-stone-500">
+                  {formatDate(o.createdAt)}
+                </p>
+                <p className="mt-3 line-clamp-2 text-sm text-stone-600">
+                  {o.items
+                    .map((it) => `${it.quantity} x ${it.name}`)
+                    .join(", ")}
+                </p>
+                <div className="mt-3 flex items-center justify-between">
+                  <p className="font-bold text-caramel">{o.total} Tk</p>
+                  <span className="text-sm font-medium text-caramel transition group-hover:translate-x-1">
+                    Track order →
+                  </span>
+                </div>
+              </Link>
+
+              <div className="mt-4 border-t border-latte pt-4">
+                <ReorderButton order={o} />
               </div>
-              <p className="mt-1 text-sm text-stone-500">
-                {formatDate(o.createdAt)}
-              </p>
-              <p className="mt-3 line-clamp-2 text-sm text-stone-600">
-                {o.items.map((it) => `${it.quantity} x ${it.name}`).join(", ")}
-              </p>
-              <div className="mt-3 flex items-center justify-between">
-                <p className="font-bold text-caramel">{o.total} Tk</p>
-                <span className="text-sm font-medium text-caramel transition group-hover:translate-x-1">
-                  Track order →
-                </span>
-              </div>
-            </Link>
+            </div>
           ))}
       </div>
     </div>

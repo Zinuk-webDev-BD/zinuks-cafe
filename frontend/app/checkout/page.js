@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -13,6 +12,8 @@ import AnimatedNumber from "@/components/AnimatedNumber";
 import { apiGet, apiRequest } from "@/lib/api";
 import { burst } from "@/lib/burst";
 import { playfair } from "@/lib/fonts";
+
+const ICON = { Home: "🏠", Office: "🏢", Other: "📍" };
 
 const DECOR = [
   { e: "☕", left: "6%", top: "18%", size: "3.5rem", dur: 9, delay: 0 },
@@ -90,6 +91,10 @@ function CheckoutForm() {
   const { user, token } = useAuth();
   const { items, subtotal, mounted, clearCart, updateQty } = useCart();
   const [settings, setSettings] = useState(null);
+  const [saved, setSaved] = useState([]);
+  const [selectedId, setSelectedId] = useState("new");
+  const [saveAddress, setSaveAddress] = useState(true);
+  const [label, setLabel] = useState("Home");
   const [form, setForm] = useState({
     name: null,
     phone: "",
@@ -107,15 +112,57 @@ function CheckoutForm() {
       .catch(() => setSettings(null));
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    apiRequest("/auth/me", { token })
+      .then((data) => {
+        if (cancelled) return;
+        const addrs = data.user.addresses || [];
+        setSaved(addrs);
+        const def = addrs.find((a) => a.isDefault) || addrs[0];
+        if (def) {
+          setSelectedId(def._id);
+          setForm((f) => ({
+            ...f,
+            name: def.name,
+            phone: def.phone,
+            address: def.address,
+          }));
+        } else if (data.user.phone) {
+          setForm((f) => ({ ...f, phone: f.phone || data.user.phone }));
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
   const name = form.name !== null ? form.name : user ? user.name : "";
   const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const pick = (a) => {
+    setSelectedId(a._id);
+    setForm((f) => ({
+      ...f,
+      name: a.name,
+      phone: a.phone,
+      address: a.address,
+    }));
+  };
+
+  const chooseNew = () => {
+    setSelectedId("new");
+    setForm((f) => ({ ...f, name: null, phone: "", address: "" }));
+  };
 
   const deliveryFee = settings ? settings.deliveryFee : 0;
   const minOrder = settings ? settings.minOrder : 0;
   const isOpen = settings ? settings.isOpen : true;
   const total = subtotal + deliveryFee;
   const belowMin = subtotal < minOrder;
-  const progress = minOrder > 0 ? Math.min(100, (subtotal / minOrder) * 100) : 100;
+  const progress =
+    minOrder > 0 ? Math.min(100, (subtotal / minOrder) * 100) : 100;
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -141,6 +188,24 @@ function CheckoutForm() {
           paymentMethod: "cod",
         },
       });
+
+      // নতুন ঠিকানা হলে ও টিক থাকলে পরের বারের জন্য সেভ
+      if (selectedId === "new" && saveAddress) {
+        const exists = saved.some(
+          (a) =>
+            a.address.trim().toLowerCase() === form.address.trim().toLowerCase()
+        );
+        if (!exists) {
+          try {
+            await apiRequest("/auth/addresses", {
+              method: "POST",
+              token,
+              body: { label, name, phone: form.phone, address: form.address },
+            });
+          } catch {}
+        }
+      }
+
       clearCart();
       burst(
         window.innerWidth / 2,
@@ -247,6 +312,47 @@ function CheckoutForm() {
           >
             <StepTitle n="1">Delivery details</StepTitle>
 
+            {saved.length > 0 && (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {saved.map((a) => (
+                  <button
+                    type="button"
+                    key={a._id}
+                    onClick={() => pick(a)}
+                    className={`relative rounded-xl border-2 p-3 text-left transition ${
+                      selectedId === a._id
+                        ? "border-caramel bg-cream"
+                        : "border-latte hover:border-caramel/60"
+                    }`}
+                  >
+                    {selectedId === a._id && (
+                      <span className="pop absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-caramel text-[10px] text-white">
+                        ✓
+                      </span>
+                    )}
+                    <p className="text-sm font-semibold">
+                      {ICON[a.label] || "📍"} {a.label}
+                      {a.isDefault ? " · Default" : ""}
+                    </p>
+                    <p className="truncate text-xs text-stone-500">
+                      {a.address}
+                    </p>
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={chooseNew}
+                  className={`rounded-xl border-2 border-dashed p-3 text-left text-sm transition ${
+                    selectedId === "new"
+                      ? "border-caramel bg-cream"
+                      : "border-latte hover:border-caramel/60"
+                  }`}
+                >
+                  ➕ New address
+                </button>
+              </div>
+            )}
+
             <FloatingInput
               label="Full name"
               icon="🙂"
@@ -272,6 +378,32 @@ function CheckoutForm() {
               onChange={onChange}
               autoComplete="street-address"
             />
+
+            {selectedId === "new" && (
+              <div className="flex flex-wrap items-center gap-3 text-sm">
+                <label className="flex cursor-pointer items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={saveAddress}
+                    onChange={(e) => setSaveAddress(e.target.checked)}
+                    className="accent-[#c8793a]"
+                  />
+                  Save this address for next time
+                </label>
+                {saveAddress && (
+                  <select
+                    value={label}
+                    onChange={(e) => setLabel(e.target.value)}
+                    className="rounded-full border border-latte bg-white px-3 py-1 text-sm outline-none"
+                  >
+                    <option>Home</option>
+                    <option>Office</option>
+                    <option>Other</option>
+                  </select>
+                )}
+              </div>
+            )}
+
             <textarea
               name="note"
               value={form.note}

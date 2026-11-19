@@ -73,6 +73,14 @@ export function AuthProvider({ children }) {
     window.dispatchEvent(new Event(EVENT));
   }, []);
 
+  const updateUser = useCallback((patch) => {
+    try {
+      const current = JSON.parse(localStorage.getItem(KEY));
+      if (!current || !current.token) return;
+      save({ user: { ...current.user, ...patch }, token: current.token });
+    } catch {}
+  }, []);
+
   const value = {
     user: auth.user,
     token: auth.token,
@@ -80,6 +88,7 @@ export function AuthProvider({ children }) {
     login,
     register,
     logout,
+    updateUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

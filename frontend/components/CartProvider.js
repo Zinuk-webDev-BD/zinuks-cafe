@@ -43,6 +43,16 @@ function write(items) {
 const makeKey = (id, variant, addOns) =>
   [id, variant || "", ...addOns.map((a) => a.name).sort()].join("|");
 
+function merge(current, line) {
+  const key = makeKey(line.menuItem, line.variant, line.addOns);
+  const existing = current.find((i) => i.key === key);
+  if (existing) {
+    existing.quantity = Math.min(20, existing.quantity + line.quantity);
+  } else {
+    current.push({ ...line, key, quantity: Math.min(20, line.quantity) });
+  }
+}
+
 export function CartProvider({ children }) {
   const raw = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const mounted = useSyncExternalStore(
@@ -71,18 +81,18 @@ export function CartProvider({ children }) {
   const addItem = useCallback(
     (line) => {
       const current = read();
-      const key = makeKey(line.menuItem, line.variant, line.addOns);
-      const existing = current.find((i) => i.key === key);
-      if (existing) {
-        existing.quantity = Math.min(20, existing.quantity + line.quantity);
-      } else {
-        current.push({ ...line, key, quantity: Math.min(20, line.quantity) });
-      }
+      merge(current, line);
       write(current);
       showToast(`${line.name} added to cart`);
     },
     [showToast]
   );
+
+  const addMany = useCallback((lines) => {
+    const current = read();
+    lines.forEach((line) => merge(current, line));
+    write(current);
+  }, []);
 
   const updateQty = useCallback((key, quantity) => {
     const current = read();
@@ -116,6 +126,8 @@ export function CartProvider({ children }) {
     openCart,
     closeCart,
     addItem,
+    addMany,
+    showToast,
     updateQty,
     removeItem,
     clearCart,
