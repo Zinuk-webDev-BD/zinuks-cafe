@@ -2,6 +2,11 @@ const Order = require("../models/Order");
 const MenuItem = require("../models/MenuItem");
 const Settings = require("../models/Settings");
 const { notifyAdmins, notifyUser } = require("../sockets");
+const {
+  evaluateCoupon,
+  reserveCoupon,
+  releaseCoupon,
+} = require("../utils/coupon");
 
 const FLOW = {
   pending: ["confirmed", "cancelled"],
@@ -94,22 +99,44 @@ exports.createOrder = async (req, res) => {
     if (subtotal < settings.minOrder)
       return fail(`Minimum order is ${settings.minOrder} Tk`);
 
-    const order = await Order.create({
-      orderNumber: makeOrderNumber(),
-      user: req.user._id,
-      items: orderItems,
-      subtotal,
-      deliveryFee: settings.deliveryFee,
-      total: subtotal + settings.deliveryFee,
-      paymentMethod: "cod",
-      address: {
-        name: address.name,
-        phone: address.phone,
-        address: address.address,
-        note: address.note || "",
-      },
-      statusHistory: [{ status: "pending", by: req.user._id }],
-    });
+    // Coupon: check again on the server with the real prices
+    let discount = 0;
+    let usedCoupon = null;
+    const couponCode = String(req.body.couponCode || "").trim().toUpperCase();
+    if (couponCode) {
+      const result = await evaluateCoupon(couponCode, subtotal, req.user._id);
+      if (result.error) return fail(result.error);
+      if (!(await reserveCoupon(result.coupon)))
+        return fail("This coupon has reached its usage limit");
+      discount = result.discount;
+      usedCoupon = result.coupon;
+    }
+
+    let order;
+    try {
+      order = await Order.create({
+        orderNumber: makeOrderNumber(),
+        user: req.user._id,
+        items: orderItems,
+        subtotal,
+        deliveryFee: settings.deliveryFee,
+        discount,
+        couponCode: usedCoupon ? usedCoupon.code : "",
+        total: subtotal - discount + settings.deliveryFee,
+        paymentMethod: "cod",
+        address: {
+          name: address.name,
+          phone: address.phone,
+          address: address.address,
+          note: address.note || "",
+        },
+        statusHistory: [{ status: "pending", by: req.user._id }],
+      });
+    } catch (err) {
+      // Order failed, so give the coupon use back
+      if (usedCoupon) await releaseCoupon(usedCoupon.code);
+      throw err;
+    }
 
     notifyAdmins("order:new", order);
     res.status(201).json(order);
@@ -160,6 +187,7 @@ exports.cancelMyOrder = async (req, res) => {
     order.status = "cancelled";
     order.statusHistory.push({ status: "cancelled", by: req.user._id });
     await order.save();
+    await releaseCoupon(order.couponCode);
     notifyAdmins("order:updated", order);
     res.json(order);
   } catch (err) {
@@ -201,6 +229,8 @@ exports.updateStatus = async (req, res) => {
       order.paymentStatus = "paid";
     }
     await order.save();
+
+    if (status === "cancelled") await releaseCoupon(order.couponCode);
 
     notifyUser(order.user, "order:status", {
       _id: order._id,

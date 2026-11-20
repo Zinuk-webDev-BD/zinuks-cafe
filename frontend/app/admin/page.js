@@ -7,6 +7,7 @@ import RequireAdmin from "@/components/RequireAdmin";
 import AdminOrderCard from "@/components/AdminOrderCard";
 import AdminMenu from "@/components/AdminMenu";
 import AdminSettings from "@/components/AdminSettings";
+import AdminCoupons from "@/components/AdminCoupons";
 import AnimatedNumber from "@/components/AnimatedNumber";
 import { API_URL, apiRequest } from "@/lib/api";
 import { enableSound, beep } from "@/lib/beep";
@@ -23,6 +24,7 @@ const FILTERS = [
 const TABS = [
   { key: "orders", label: "📦 Orders" },
   { key: "menu", label: "🍽️ Menu" },
+  { key: "coupons", label: "🏷️ Coupons" },
   { key: "settings", label: "⚙️ Settings" },
 ];
 
@@ -295,6 +297,12 @@ function Dashboard() {
           <div className="card-in rounded-2xl bg-white p-6 shadow-lg">
             <h2 className="mb-4 text-xl font-semibold">Menu availability</h2>
             <AdminMenu />
+          </div>
+        )}
+                {tab === "coupons" && (
+          <div className="card-in rounded-2xl bg-white p-6 shadow-lg">
+            <h2 className="mb-4 text-xl font-semibold">Coupons</h2>
+            <AdminCoupons />
           </div>
         )}
 

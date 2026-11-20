@@ -105,6 +105,33 @@ function CheckoutForm() {
   const [errorKey, setErrorKey] = useState(0);
   const [loading, setLoading] = useState(false);
   const [placed, setPlaced] = useState(null);
+    const [couponInput, setCouponInput] = useState("");
+  const [applied, setApplied] = useState(null); // { code, discount, description }
+  const [couponMsg, setCouponMsg] = useState("");
+  const [checking, setChecking] = useState(false);
+  const appliedCode = applied ? applied.code : "";
+
+  // Cart changed after applying? Check the coupon again with the new subtotal
+  useEffect(() => {
+    if (!appliedCode) return;
+    let cancelled = false;
+    apiRequest("/coupons/validate", {
+      method: "POST",
+      token,
+      body: { code: appliedCode, subtotal },
+    })
+      .then((data) => {
+        if (!cancelled) setApplied(data);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setApplied(null);
+        setCouponMsg(err.message);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [subtotal, appliedCode, token]);
 
   useEffect(() => {
     apiGet("/settings")
@@ -159,11 +186,35 @@ function CheckoutForm() {
   const deliveryFee = settings ? settings.deliveryFee : 0;
   const minOrder = settings ? settings.minOrder : 0;
   const isOpen = settings ? settings.isOpen : true;
-  const total = subtotal + deliveryFee;
+    const discount = applied ? Math.min(applied.discount, subtotal) : 0;
+  const total = subtotal - discount + deliveryFee;
   const belowMin = subtotal < minOrder;
   const progress =
     minOrder > 0 ? Math.min(100, (subtotal / minOrder) * 100) : 100;
+  const applyCoupon = async () => {
+    const code = couponInput.trim();
+    if (!code) return;
+    setChecking(true);
+    setCouponMsg("");
+    try {
+      const data = await apiRequest("/coupons/validate", {
+        method: "POST",
+        token,
+        body: { code, subtotal },
+      });
+      setApplied(data);
+      setCouponInput("");
+    } catch (err) {
+      setCouponMsg(err.message);
+    } finally {
+      setChecking(false);
+    }
+  };
 
+  const removeCoupon = () => {
+    setApplied(null);
+    setCouponMsg("");
+  };
   const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -186,6 +237,7 @@ function CheckoutForm() {
             note: form.note,
           },
           paymentMethod: "cod",
+                    couponCode: applied ? applied.code : undefined,
         },
       });
 
@@ -554,7 +606,55 @@ function CheckoutForm() {
                   </div>
                 </div>
               )}
-
+                                   <div className="mt-5">
+                {applied ? (
+                  <div className="pop flex items-center justify-between gap-2 rounded-xl border-2 border-green-400 bg-green-50 px-3 py-2">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-green-700">
+                        🏷️ {applied.code} applied
+                      </p>
+                      <p className="truncate text-xs text-green-600">
+                        {applied.description}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={removeCoupon}
+                      className="shrink-0 text-xs font-medium text-red-500 hover:underline"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex gap-2">
+                      <input
+                        value={couponInput}
+                        onChange={(e) => setCouponInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            applyCoupon();
+                          }
+                        }}
+                        placeholder="Coupon code"
+                        className="min-w-0 flex-1 rounded-full border-[1.5px] border-latte px-4 py-2 text-sm uppercase outline-none transition focus:border-caramel"
+                      />
+                      <button
+                        type="button"
+                        onClick={applyCoupon}
+                        disabled={checking || !couponInput.trim()}
+                        className="rounded-full bg-espresso px-4 py-2 text-sm font-semibold text-white transition hover:bg-caramel disabled:opacity-60"
+                      >
+                        {checking ? "..." : "Apply"}
+                      </button>
+                    </div>
+                    {couponMsg && (
+                      <p className="mt-2 text-xs text-red-600">⚠️ {couponMsg}</p>
+                    )}
+                  </div>
+                )}
+              </div>
               <div className="mt-5 space-y-2 border-t border-latte pt-4 text-sm">
                 <div className="flex justify-between">
                   <span className="text-stone-500">Subtotal</span>
@@ -562,6 +662,12 @@ function CheckoutForm() {
                     <AnimatedNumber value={subtotal} /> Tk
                   </span>
                 </div>
+                                {discount > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Coupon ({applied.code})</span>
+                    <span>- {discount} Tk</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-stone-500">Delivery fee</span>
                   <span>{settings ? `${deliveryFee} Tk` : "..."}</span>
