@@ -68,7 +68,14 @@ export default function AdminOrderCard({
       </div>
 
       <div className="mt-3 flex items-center justify-between">
-        <p className="text-lg font-bold text-caramel">{order.total} Tk</p>
+                <div>
+          <p className="text-lg font-bold text-caramel">{order.total} Tk</p>
+          {order.couponCode && (
+            <p className="text-xs text-green-600">
+              🏷️ {order.couponCode} (-{order.discount} Tk)
+            </p>
+          )}
+        </div>
         <p className="text-xs text-stone-500">
           💵 COD · {order.paymentStatus === "paid" ? "Paid" : "Unpaid"}
         </p>

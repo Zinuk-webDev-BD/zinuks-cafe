@@ -193,6 +193,12 @@ function OrderTracker() {
                     <span className="text-stone-500">Subtotal</span>
                     <span>{order.subtotal} Tk</span>
                   </div>
+                                    {order.discount > 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span>Coupon ({order.couponCode})</span>
+                      <span>- {order.discount} Tk</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-stone-500">Delivery fee</span>
                     <span>{order.deliveryFee} Tk</span>

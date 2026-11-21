@@ -1,12 +1,19 @@
 const Order = require("../models/Order");
 const MenuItem = require("../models/MenuItem");
 const Settings = require("../models/Settings");
+const User = require("../models/User");
 const { notifyAdmins, notifyUser } = require("../sockets");
 const {
   evaluateCoupon,
   reserveCoupon,
   releaseCoupon,
 } = require("../utils/coupon");
+const { sendMailSafe } = require("../utils/mailer");
+const {
+  orderPlacedEmail,
+  statusEmail,
+  adminNewOrderEmail,
+} = require("../utils/emailTemplates");
 
 const FLOW = {
   pending: ["confirmed", "cancelled"],
@@ -16,6 +23,8 @@ const FLOW = {
   delivered: [],
   cancelled: [],
 };
+
+const clientUrl = () => process.env.CLIENT_URL || "http://localhost:3000";
 
 const makeOrderNumber = () =>
   "ZC-" +
@@ -139,6 +148,22 @@ exports.createOrder = async (req, res) => {
     }
 
     notifyAdmins("order:new", order);
+
+    // Emails (never block or break the order)
+    sendMailSafe({
+      to: req.user.email,
+      subject: `Order ${order.orderNumber} received`,
+      html: orderPlacedEmail(order, `${clientUrl()}/orders/${order._id}`),
+    });
+    const ownerEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
+    if (ownerEmail) {
+      sendMailSafe({
+        to: ownerEmail,
+        subject: `🔔 New order ${order.orderNumber} · ${order.total} Tk`,
+        html: adminNewOrderEmail(order, `${clientUrl()}/admin`),
+      });
+    }
+
     res.status(201).json(order);
   } catch (err) {
     handleError(res, err);
@@ -189,6 +214,10 @@ exports.cancelMyOrder = async (req, res) => {
     await order.save();
     await releaseCoupon(order.couponCode);
     notifyAdmins("order:updated", order);
+
+    const copy = statusEmail(order, `${clientUrl()}/orders/${order._id}`);
+    if (copy) sendMailSafe({ to: req.user.email, ...copy });
+
     res.json(order);
   } catch (err) {
     handleError(res, err);
@@ -238,6 +267,12 @@ exports.updateStatus = async (req, res) => {
       status: order.status,
     });
     notifyAdmins("order:updated", order);
+
+    const copy = statusEmail(order, `${clientUrl()}/orders/${order._id}`);
+    if (copy) {
+      const customer = await User.findById(order.user).select("email");
+      if (customer) sendMailSafe({ to: customer.email, ...copy });
+    }
 
     res.json(order);
   } catch (err) {
